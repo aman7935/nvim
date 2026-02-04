@@ -2,7 +2,7 @@ vim.g.mapleader = " "
 
 local k = vim.keymap.set
 k("n", "<leader>w", ":w<CR>")
-k("n", "<leader>q", ":q<CR>")
+k("n", "<leader>qa", ":qa!<CR>")
 
 local opts = { noremap = true, silent = true }
 

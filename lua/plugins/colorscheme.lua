@@ -1,9 +1,9 @@
 return {
 	{
-		"folke/tokyonight.nvim",
+		"ellisonleao/gruvbox.nvim",
 		priority = 1000,
 		config = function()
-			vim.cmd.colorscheme("tokyonight")
+			vim.cmd.colorscheme("gruvbox")
 		end,
 	},
 
@@ -13,7 +13,7 @@ return {
 			"nvim-tree/nvim-web-devicons",
 		},
 		opts = {
-			theme = "tokyonight",
+			theme = "gruvbox",
 		},
 	},
 }

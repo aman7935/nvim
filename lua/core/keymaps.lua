@@ -14,3 +14,5 @@ k("n", "<C-l>", "<C-w>l", opts)
 k("n", "qq", function()
 	require("conform").format({ async = true })
 end, { desc = "Format file" })
+
+k("n", "<Esc>", ":nohlsearch<CR>", { silent = true, desc = "Clear search highlights" })

@@ -34,6 +34,7 @@ return {
 			on_open = function(term)
 				vim.cmd("setlocal bufhidden=hide")
 				vim.cmd("setlocal nobuflisted")
+				vim.cmd("startinsert")
 			end,
 		})
 
@@ -54,6 +55,8 @@ return {
 		vim.api.nvim_set_keymap("t", "<Esc>", [[<C-\><C-n>]], { noremap = true, silent = true })
 		-- Toggle floating terminal
 		vim.api.nvim_set_keymap("n", "<C-/>", "<cmd>lua _float_toggle()<CR>", { noremap = true, silent = true })
+		vim.api.nvim_set_keymap("t", "<C-/>", "<cmd>lua _float_toggle()<CR>", { noremap = true, silent = true })
+		vim.api.nvim_set_keymap("t", "<C-_>", "<cmd>lua _float_toggle()<CR>", { noremap = true, silent = true })
 		-- Toggle horizontal terminal
 		vim.api.nvim_set_keymap("n", "<leader>tt", "<cmd>lua _horiz_toggle()<CR>", { noremap = true, silent = true })
 

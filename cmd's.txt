@@ -1,0 +1,1 @@
+TO DELETE ALL THE LINES WHICH STARTS WITH ANY LETTER (in deleting line with the #) -------====> :g/^\s*#/d 

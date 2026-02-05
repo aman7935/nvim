@@ -9,18 +9,19 @@ return {
 	config = function()
 		vim.diagnostic.config({
 			virtual_text = { prefix = "●", spacing = 2 },
-			signs = true,
+			signs = {
+				text = {
+					[vim.diagnostic.severity.ERROR] = "",
+					[vim.diagnostic.severity.WARN] = "",
+					[vim.diagnostic.severity.HINT] = "",
+					[vim.diagnostic.severity.INFO] = "",
+				},
+			},
 			underline = true,
 			update_in_insert = false,
 			severity_sort = true,
 			float = { border = "rounded", source = "always" },
 		})
-
-		local signs = { Error = "", Warn = "", Hint = "", Info = "" }
-		for type, icon in pairs(signs) do
-			local hl = "DiagnosticSign" .. type
-			vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
-		end
 
 		local capabilities = require("cmp_nvim_lsp").default_capabilities()
 		capabilities.textDocument.completion.completionItem.resolveSupport = {
@@ -82,7 +83,7 @@ return {
 					null_ls.builtins.formatting.black,
 				},
 				on_attach = function(client, bufnr)
-					if client.supports_method("textDocument/formatting") then
+					if client:supports_method("textDocument/formatting") then
 						local opts = { buffer = bufnr, silent = true, noremap = true }
 						vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, opts)
 					end

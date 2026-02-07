@@ -8,6 +8,5 @@ opt.tabstop = 2
 opt.smartindent = true
 opt.wrap = false
 opt.termguicolors = true
-opt.scrolloff = 8
 opt.signcolumn = "yes"
 vim.opt.clipboard = "unnamedplus"

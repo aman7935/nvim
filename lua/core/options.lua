@@ -12,5 +12,5 @@ opt.signcolumn = "yes"
 opt.clipboard = "unnamedplus"
 opt.scrolloff = 8
 opt.sidescrolloff = 8
-opt.lazyredraw = true
+opt.lazyredraw = false
 opt.ttyfast = true

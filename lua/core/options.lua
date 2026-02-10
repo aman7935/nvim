@@ -10,7 +10,6 @@ opt.wrap = false
 opt.termguicolors = true
 opt.signcolumn = "yes"
 opt.clipboard = "unnamedplus"
-opt.scrolloff = 8
 opt.sidescrolloff = 8
 opt.lazyredraw = false
 opt.ttyfast = true

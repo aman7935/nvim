@@ -55,6 +55,7 @@ return {
                 },
             },
             pyright = { settings = { python = { analysis = { typeCheckingMode = "basic" } } } },
+            ruff = {},
             ts_ls = {},
             kotlin_language_server = {},
             jdtls = {
@@ -78,9 +79,6 @@ return {
         if ok then
             null_ls.setup({
                 sources = {
-                    null_ls.builtins.formatting.stylua,
-                    null_ls.builtins.formatting.prettier,
-                    null_ls.builtins.formatting.black,
                 },
                 on_attach = function(client, bufnr)
                     if client:supports_method("textDocument/formatting") then
@@ -91,11 +89,12 @@ return {
             })
         end
 
-        vim.api.nvim_create_autocmd("BufWritePre", {
-            pattern = "*",
-            callback = function()
-                vim.lsp.buf.format({ async = false })
-            end,
-        })
+        -- Removed default format on save to avoid conflicts with conform.nvim
+        -- vim.api.nvim_create_autocmd("BufWritePre", {
+        --     pattern = "*",
+        --     callback = function()
+        --         vim.lsp.buf.format({ async = false })
+        --     end,
+        -- })
     end,
 }

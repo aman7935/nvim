@@ -3,7 +3,8 @@ return {
 	dependencies = { "williamboman/mason.nvim" },
 	opts = {
 		ensure_installed = {
-			"black",
+			"ruff",
+			"debugpy",
 			"prettier",
 			"stylua",
 			"google-java-format",
@@ -12,6 +13,7 @@ return {
 			-- LSP servers (Mason names)
 			"lua-language-server",
 			"pyright",
+			"ruff",
 			"typescript-language-server",
 			"kotlin-language-server",
 			"jdtls",

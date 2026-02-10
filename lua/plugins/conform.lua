@@ -3,7 +3,7 @@ return {
   event = { "BufReadPre", "BufNewFile" },
   opts = {
     formatters_by_ft = {
-      python = { "black" },
+      python = { "ruff_fix", "ruff_format", "ruff_organize_imports" },
       javascript = { "prettier" },
       typescript = { "prettier" },
       lua = { "stylua" },

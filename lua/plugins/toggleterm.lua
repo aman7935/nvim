@@ -53,7 +53,9 @@ return {
 		})
 		vim.api.nvim_create_autocmd("VimLeavePre", {
 			callback = function()
-				for _, term in ipairs(Terminal.get_all()) do
+				local ok, terminal_module = pcall(require, "toggleterm.terminal")
+				if not ok then return end
+				for _, term in ipairs(terminal_module.get_all()) do
 					if term:is_open() and term.job_id then
 						vim.fn.jobstop(term.job_id)
 						pcall(term.close, term)

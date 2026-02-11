@@ -9,45 +9,54 @@ return {
         "saadparwaiz1/cmp_luasnip",
         "rafamadriz/friendly-snippets",
         "hrsh7th/cmp-emoji",
-        "abecodes/tabout.nvim",
     },
     config = function()
         local cmp = require("cmp")
         local luasnip = require("luasnip")
-        local tabout = require("tabout")
-
         require("luasnip.loaders.from_vscode").lazy_load()
 
-        tabout.setup({
-            tabkey = "<Tab>",
-            backwards_tabkey = "<S-Tab>",
-            act_as_tab = true,
-            completion = true,
-            ignore_beginning = true,
-            enable_backwards = true,
-        })
+        -- Enhanced EscapePair function (from Reddit)
+        -- Finds the nearest closing character and jumps to it
+        local function escape_pair()
+            local closers = { ")", "]", "}", ">", "'", '"', "`", "," }
+            local line = vim.api.nvim_get_current_line()
+            local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+            local after = line:sub(col + 1, -1)
+            local closer_col = #after + 1
+            local closer_i = nil
+            for i, closer in ipairs(closers) do
+                local cur_index, _ = after:find(closer)
+                if cur_index and (cur_index < closer_col) then
+                    closer_col = cur_index
+                    closer_i = i
+                end
+            end
+            if closer_i then
+                vim.api.nvim_win_set_cursor(0, { row, col + closer_col })
+                return true
+            end
+            return false
+        end
 
-        local function tab_complete()
+        local function tab_complete(fallback)
             if cmp.visible() then
-                return cmp.select_next_item()
+                cmp.select_next_item()
             elseif luasnip.expand_or_jumpable() then
-                return luasnip.expand_or_jump()
-            elseif tabout.tabout() then
-                return ""
+                luasnip.expand_or_jump()
+            elseif escape_pair() then
+                -- successfully jumped to closing character
             else
-                return "\t"
+                fallback()
             end
         end
 
-        local function shift_tab_complete()
+        local function shift_tab_complete(fallback)
             if cmp.visible() then
-                return cmp.select_prev_item()
+                cmp.select_prev_item()
             elseif luasnip.jumpable(-1) then
-                return luasnip.jump(-1)
-            elseif tabout.tabout({ backwards = true }) then
-                return ""
+                luasnip.jump(-1)
             else
-                return "\b"
+                fallback()
             end
         end
 

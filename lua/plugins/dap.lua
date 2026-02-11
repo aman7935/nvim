@@ -22,6 +22,8 @@ return {
 			dapui.close()
 		end
 
-		vim.fn.sign_define("DapBreakpoint", { text = "⏺", texthl = "Error", linehl = "", numhl = "" })
+		-- Modern breakpoint sign configuration
+		vim.fn.sign_define("DapBreakpoint", { text = "⏺", texthl = "DiagnosticError" })
+		vim.fn.sign_define("DapStopped", { text = "▶", texthl = "DiagnosticInfo" })
 	end,
 }

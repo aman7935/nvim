@@ -32,5 +32,15 @@ k("n", "<leader>ts", "<cmd>lua require('neotest').summary.toggle()<CR>", { desc 
 k("n", "<leader>to", "<cmd>lua require('neotest').output_panel.toggle()<CR>", { desc = "Toggle test output" })
 k("n", "<leader>td", "<cmd>lua require('neotest').run.run({strategy = 'dap'})<CR>", { desc = "Debug nearest test" })
 
+
+-- Explorer
+k("n", "<leader>x", function()
+	if vim.bo.filetype == "netrw" then
+		vim.cmd("Rexplore")
+	else
+		vim.cmd("Ex")
+	end
+end, { desc = "Toggle Explorer" })
+
 -- Python Tools
 k("n", "<leader>cv", "<cmd>VenvSelect<cr>", { desc = "Select VirtualEnv" })

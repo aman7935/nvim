@@ -30,3 +30,7 @@ k("n", "<leader>tr", "<cmd>lua require('neotest').run.run()<CR>", { desc = "Run 
 k("n", "<leader>tf", "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<CR>", { desc = "Run current file" })
 k("n", "<leader>ts", "<cmd>lua require('neotest').summary.toggle()<CR>", { desc = "Toggle test summary" })
 k("n", "<leader>to", "<cmd>lua require('neotest').output_panel.toggle()<CR>", { desc = "Toggle test output" })
+k("n", "<leader>td", "<cmd>lua require('neotest').run.run({strategy = 'dap'})<CR>", { desc = "Debug nearest test" })
+
+-- Python Tools
+k("n", "<leader>cv", "<cmd>VenvSelect<cr>", { desc = "Select VirtualEnv" })

@@ -15,8 +15,6 @@ return {
 		local luasnip = require("luasnip")
 		require("luasnip.loaders.from_vscode").lazy_load()
 
-		-- Enhanced EscapePair function (from Reddit)
-		-- Finds the nearest closing character and jumps to it
 		local function escape_pair()
 			local closers = { ")", "]", "}", ">", "'", '"', "`", "," }
 			local line = vim.api.nvim_get_current_line()

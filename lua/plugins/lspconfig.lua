@@ -54,7 +54,23 @@ return {
                     },
                 },
             },
-            pyright = { settings = { python = { analysis = { typeCheckingMode = "basic" } } } },
+            pyright = {
+                on_init = function(client)
+                    local venv = vim.fn.finddir(".venv", client.config.root_dir .. ";")
+                    if venv ~= "" then
+                        client.config.settings.python.pythonPath = venv .. "/bin/python"
+                    end
+                end,
+                settings = {
+                    python = {
+                        analysis = {
+                            typeCheckingMode = "basic",
+                            autoSearchPaths = true,
+                            useLibraryCodeForTypes = true,
+                        },
+                    },
+                },
+            },
             ruff = {},
             ts_ls = {},
             kotlin_language_server = {},

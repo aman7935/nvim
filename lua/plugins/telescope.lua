@@ -10,13 +10,13 @@ return {
             i = {
               ["<C-v>"] = function()
                 local clipboard = vim.fn.getreg("+"):gsub("\n", "")
-                vim.api.nvim_put({ clipboard }, "c", false, true)
+                vim.api.nvim_put({ " " .. clipboard }, "c", false, true)
               end,
             },
             n = {
               ["p"] = function()
                 local clipboard = vim.fn.getreg("+"):gsub("\n", "")
-                vim.api.nvim_put({ clipboard }, "c", false, true)
+                vim.api.nvim_put({ " " .. clipboard }, "c", false, true)
               end,
             },
           },

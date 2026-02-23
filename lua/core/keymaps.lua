@@ -11,6 +11,12 @@ k("n", "<C-j>", "<C-w>j", opts)
 k("n", "<C-k>", "<C-w>k", opts)
 k("n", "<C-l>", "<C-w>l", opts)
 
+-- Insert mode movement
+k("i", "<C-h>", "<Left>", opts)
+k("i", "<C-j>", "<Down>", opts)
+k("i", "<C-k>", "<Up>", opts)
+k("i", "<C-l>", "<Right>", opts)
+
 k("n", "qq", function()
 	require("conform").format({ async = true })
 end, { desc = "Format file" })

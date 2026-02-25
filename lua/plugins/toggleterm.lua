@@ -4,6 +4,8 @@ return {
 	config = function()
 		local Terminal = require("toggleterm.terminal").Terminal
 		local toggleterm = require("toggleterm")
+		local lazygit_return_win = nil
+		local lazygit_return_buf = nil
 		vim.o.hidden = true
 		toggleterm.setup({
 			size = function(term)
@@ -38,11 +40,62 @@ return {
 			horiz_term:toggle()
 		end
 
+		local lazygit = Terminal:new({
+			cmd = "lazygit",
+			direction = "float",
+			hidden = true,
+			close_on_exit = true,
+			on_open = function(term)
+				vim.cmd("startinsert")
+				vim.keymap.set("t", "<Esc>", function()
+					if term.job_id and term.job_id > 0 then
+						vim.api.nvim_chan_send(term.job_id, "\27")
+					end
+				end, { buffer = term.bufnr, silent = true, desc = "Send Esc to lazygit" })
+			end,
+			on_close = function()
+				vim.schedule(function()
+					if lazygit_return_win and vim.api.nvim_win_is_valid(lazygit_return_win) then
+						vim.api.nvim_set_current_win(lazygit_return_win)
+					elseif lazygit_return_buf and vim.api.nvim_buf_is_valid(lazygit_return_buf) then
+						local wins = vim.fn.win_findbuf(lazygit_return_buf)
+						if #wins > 0 and vim.api.nvim_win_is_valid(wins[1]) then
+							vim.api.nvim_set_current_win(wins[1])
+						end
+					end
+
+					if vim.bo.buftype == "terminal" then
+						vim.cmd("startinsert")
+						vim.defer_fn(function()
+							if vim.bo.buftype == "terminal" and vim.api.nvim_get_mode().mode:sub(1, 1) ~= "t" then
+								vim.api.nvim_input("a")
+							end
+						end, 15)
+					end
+
+					lazygit_return_win = nil
+					lazygit_return_buf = nil
+				end)
+			end,
+		})
+		function _lazygit_toggle()
+			if vim.bo.buftype == "terminal" then
+				lazygit_return_win = vim.api.nvim_get_current_win()
+				lazygit_return_buf = vim.api.nvim_get_current_buf()
+			else
+				lazygit_return_win = nil
+				lazygit_return_buf = nil
+			end
+			lazygit:toggle()
+		end
+
 		vim.api.nvim_set_keymap("t", "<Esc>", [[<C-\><C-n>]], { noremap = true, silent = true })
 		vim.api.nvim_set_keymap("n", "<C-/>", "<cmd>lua _float_toggle()<CR>", { noremap = true, silent = true })
 		vim.api.nvim_set_keymap("t", "<C-/>", "<cmd>lua _float_toggle()<CR>", { noremap = true, silent = true })
 		vim.api.nvim_set_keymap("t", "<C-_>", "<cmd>lua _float_toggle()<CR>", { noremap = true, silent = true })
 		vim.api.nvim_set_keymap("n", "<leader>tt", "<cmd>lua _horiz_toggle()<CR>", { noremap = true, silent = true })
+		vim.api.nvim_set_keymap("n", "<leader>ll", "<cmd>lua _lazygit_toggle()<CR>", { noremap = true, silent = true })
+		vim.api.nvim_set_keymap("t", "<leader>ll", [[<C-\><C-n><cmd>lua _lazygit_toggle()<CR>]], { noremap = true, silent = true })
 		vim.api.nvim_create_autocmd("BufLeave", {
 			pattern = "*",
 			callback = function()

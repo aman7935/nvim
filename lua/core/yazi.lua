@@ -5,9 +5,18 @@ local state = {
 	buf = nil,
 	chooser = nil,
 	cwd_file = nil,
-	last_dir = nil,
-	last_file = nil,
+	active_root = nil,
+	last_by_root = {},
 }
+
+local function get_project_root(path)
+	local normalized = vim.fn.fnamemodify(path, ":p")
+	local root = nil
+	if vim.fs and vim.fs.root then
+		root = vim.fs.root(normalized, { ".git" })
+	end
+	return vim.fn.fnamemodify(root or vim.fn.getcwd(), ":p")
+end
 
 local function cleanup()
 	if state.chooser and vim.fn.filereadable(state.chooser) == 1 then
@@ -34,6 +43,12 @@ function M.open(start_entry)
 		return
 	end
 
+	local current_file = vim.fn.expand("%:p")
+	local fallback = current_file
+	if fallback == "" then
+		fallback = (vim.uv or vim.loop).cwd()
+	end
+
 	cleanup()
 	state.chooser = vim.fn.tempname()
 	state.cwd_file = vim.fn.tempname()
@@ -45,26 +60,35 @@ function M.open(start_entry)
 	vim.bo[state.buf].bufhidden = "wipe"
 	vim.bo[state.buf].buflisted = false
 
+	state.active_root = get_project_root(start_entry or fallback)
+	local project_state = state.last_by_root[state.active_root] or {}
+	state.last_by_root[state.active_root] = project_state
+
 	local entry = start_entry
 	if not entry or entry == "" then
-		if state.last_file and vim.fn.filereadable(state.last_file) == 1 then
-			entry = state.last_file
+		-- Prefer the file currently open in Neovim (including startup-restored file),
+		-- then fall back to yazi's remembered location for this project.
+		if current_file ~= "" and vim.fn.filereadable(current_file) == 1 then
+			entry = current_file
+		elseif project_state.last_file and vim.fn.filereadable(project_state.last_file) == 1 then
+			entry = project_state.last_file
+		elseif project_state.last_dir and vim.fn.isdirectory(project_state.last_dir) == 1 then
+			entry = project_state.last_dir
 		else
-			entry = state.last_dir
+			entry = fallback
 		end
 	end
-	if not entry or entry == "" then
-		entry = vim.fn.expand("%:p")
-	end
-	if entry == "" then
-		entry = (vim.uv or vim.loop).cwd()
-	elseif vim.fn.isdirectory(entry) == 0 and vim.fn.filereadable(entry) == 0 then
+	if vim.fn.isdirectory(entry) == 0 and vim.fn.filereadable(entry) == 0 then
 		entry = (vim.uv or vim.loop).cwd()
 	end
 
   local job_id = vim.fn.termopen({ "yazi", entry, "--chooser-file=" .. state.chooser, "--cwd-file=" .. state.cwd_file }, {
     on_exit = function()
       vim.schedule(function()
+				local root = state.active_root or get_project_root((vim.uv or vim.loop).cwd())
+				local project_state_inner = state.last_by_root[root] or {}
+				state.last_by_root[root] = project_state_inner
+
 				local selected = {}
 				if state.chooser and vim.fn.filereadable(state.chooser) == 1 then
 					selected = vim.fn.readfile(state.chooser)
@@ -72,24 +96,29 @@ function M.open(start_entry)
 				if state.cwd_file and vim.fn.filereadable(state.cwd_file) == 1 then
 					local cwd_lines = vim.fn.readfile(state.cwd_file)
 					if #cwd_lines > 0 and cwd_lines[1] ~= "" and vim.fn.isdirectory(cwd_lines[1]) == 1 then
-						state.last_dir = vim.fn.fnamemodify(cwd_lines[1], ":p")
+						project_state_inner.last_dir = vim.fn.fnamemodify(cwd_lines[1], ":p")
 					end
 				end
 
 				close_window()
 				cleanup()
+				state.active_root = nil
 
 				if #selected > 0 and selected[1] ~= "" then
 					local first = vim.fn.fnamemodify(selected[1], ":p")
+					local selected_root = get_project_root(first)
+					local selected_state = state.last_by_root[selected_root] or {}
+					state.last_by_root[selected_root] = selected_state
+
 					if vim.fn.isdirectory(first) == 1 then
-						state.last_dir = first
-						state.last_file = nil
+						selected_state.last_dir = first
+						selected_state.last_file = nil
 						M.open(first)
 						return
 					end
 
-					state.last_dir = vim.fn.fnamemodify(first, ":h")
-					state.last_file = first
+					selected_state.last_dir = vim.fn.fnamemodify(first, ":h")
+					selected_state.last_file = first
 					pcall(vim.cmd, "edit " .. vim.fn.fnameescape(first))
 					for i = 2, #selected do
 						if selected[i] ~= "" and vim.fn.isdirectory(selected[i]) == 0 then
@@ -106,6 +135,10 @@ function M.open(start_entry)
       vim.api.nvim_chan_send(job_id, "\27")
     end
   end, { buffer = state.buf, silent = true, desc = "Send Esc to yazi" })
+
+	vim.keymap.set("t", "<leader>x", function()
+		M.toggle()
+	end, { buffer = state.buf, silent = true, desc = "Toggle Yazi Explorer" })
 
   vim.cmd("startinsert")
 end

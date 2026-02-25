@@ -1,12 +1,94 @@
 local autocmd = vim.api.nvim_create_autocmd
 
+local state_file = vim.fn.stdpath("state") .. "/last-file-by-root.json"
+local last_file_by_root = {}
+local state_dirty = false
+
+local function load_state()
+	if vim.fn.filereadable(state_file) ~= 1 then
+		return
+	end
+
+	local ok_read, lines = pcall(vim.fn.readfile, state_file)
+	if not ok_read or not lines or #lines == 0 then
+		return
+	end
+
+	local ok_decode, decoded = pcall(vim.json.decode, table.concat(lines, "\n"))
+	if ok_decode and type(decoded) == "table" then
+		last_file_by_root = decoded
+	end
+end
+
+local function save_state()
+	if not state_dirty then
+		return
+	end
+
+	local ok_encode, encoded = pcall(vim.json.encode, last_file_by_root)
+	if not ok_encode or not encoded then
+		return
+	end
+
+	pcall(vim.fn.writefile, { encoded }, state_file)
+end
+
+local function get_project_root(path)
+	local normalized = vim.fn.fnamemodify(path, ":p")
+	local root = nil
+	if vim.fs and vim.fs.root then
+		root = vim.fs.root(normalized, { ".git" })
+	end
+	return vim.fn.fnamemodify(root or vim.fn.getcwd(), ":p")
+end
+
+local function is_trackable_file(bufnr)
+	if vim.bo[bufnr].buftype ~= "" then
+		return false
+	end
+
+	local name = vim.api.nvim_buf_get_name(bufnr)
+	return name ~= "" and vim.fn.filereadable(name) == 1
+end
+
+load_state()
+
 autocmd("VimEnter", {
 	callback = function()
-		if vim.fn.argc() == 0 then
-			vim.schedule(function()
-				require("persistence").load()
-			end)
+		if vim.fn.argc() ~= 0 then
+			return
 		end
+
+		local root = get_project_root(vim.fn.getcwd())
+		local last_file = last_file_by_root[root]
+		if not last_file or vim.fn.filereadable(last_file) ~= 1 then
+			return
+		end
+
+		vim.schedule(function()
+			pcall(vim.cmd, "silent edit " .. vim.fn.fnameescape(last_file))
+		end)
+	end,
+})
+
+autocmd("BufEnter", {
+	callback = function(args)
+		if not is_trackable_file(args.buf) then
+			return
+		end
+
+		local file = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(args.buf), ":p")
+		local root = get_project_root(file)
+		if last_file_by_root[root] ~= file then
+			last_file_by_root[root] = file
+			state_dirty = true
+		end
+	end,
+})
+
+autocmd("VimLeavePre", {
+	callback = function()
+		save_state()
 	end,
 })
 

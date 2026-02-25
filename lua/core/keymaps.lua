@@ -39,7 +39,10 @@ k("n", "<leader>to", "<cmd>lua require('neotest').output_panel.toggle()<CR>", { 
 k("n", "<leader>td", "<cmd>lua require('neotest').run.run({strategy = 'dap'})<CR>", { desc = "Debug nearest test" })
 
 
--- Explorer
+-- Python Tools
+k("n", "<leader>cv", "<cmd>VenvSelect<cr>", { desc = "Select VirtualEnv" })
+
+-- Explorer (netrw)
 k("n", "<leader>x", function()
 	if vim.bo.filetype == "netrw" then
 		vim.cmd("Rexplore")
@@ -47,6 +50,3 @@ k("n", "<leader>x", function()
 		vim.cmd("Ex")
 	end
 end, { desc = "Toggle Explorer" })
-
--- Python Tools
-k("n", "<leader>cv", "<cmd>VenvSelect<cr>", { desc = "Select VirtualEnv" })

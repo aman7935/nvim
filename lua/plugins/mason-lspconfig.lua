@@ -8,6 +8,7 @@ return {
         ensure_installed = {
             "lua_ls",
             "pyright",
+            "basedpyright",
             "ts_ls",
             "kotlin_language_server",
             "jdtls",

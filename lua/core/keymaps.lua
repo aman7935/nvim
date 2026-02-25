@@ -42,11 +42,7 @@ k("n", "<leader>td", "<cmd>lua require('neotest').run.run({strategy = 'dap'})<CR
 -- Python Tools
 k("n", "<leader>cv", "<cmd>VenvSelect<cr>", { desc = "Select VirtualEnv" })
 
--- Explorer (netrw)
+-- Explorer (yazi in current window)
 k("n", "<leader>x", function()
-	if vim.bo.filetype == "netrw" then
-		vim.cmd("Rexplore")
-	else
-		vim.cmd("Ex")
-	end
-end, { desc = "Toggle Explorer" })
+	require("core.yazi").toggle()
+end, { desc = "Toggle Yazi Explorer" })

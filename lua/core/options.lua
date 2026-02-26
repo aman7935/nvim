@@ -9,6 +9,7 @@ o.smartindent = true
 o.wrap = false
 o.termguicolors = true
 o.signcolumn = "yes"
+o.cursorline = true
 o.clipboard = "unnamedplus"
 o.sidescrolloff = 8
 o.lazyredraw = false

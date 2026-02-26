@@ -39,6 +39,19 @@ local function close_window()
 	state.buf = nil
 end
 
+local function restart_python_lsp_after_yazi()
+	-- Files created in Yazi may not be indexed by Python LSP immediately.
+	-- Restart Python servers on Yazi exit to keep imports/completions fresh.
+	vim.defer_fn(function()
+		pcall(vim.cmd, "silent! LspRestart basedpyright")
+		pcall(vim.cmd, "silent! LspRestart pyright")
+	end, 120)
+	vim.defer_fn(function()
+		pcall(vim.cmd, "silent! LspRestart basedpyright")
+		pcall(vim.cmd, "silent! LspRestart pyright")
+	end, 700)
+end
+
 local function open_toggle_window()
 	state.buf = vim.api.nvim_create_buf(false, true)
 
@@ -125,9 +138,10 @@ function M.open(start_entry)
 					end
 				end
 
-				close_window()
-				cleanup()
-				state.active_root = nil
+					close_window()
+					cleanup()
+					state.active_root = nil
+					restart_python_lsp_after_yazi()
 
 				if #selected > 0 and selected[1] ~= "" then
 					local first = vim.fn.fnamemodify(selected[1], ":p")
@@ -145,15 +159,15 @@ function M.open(start_entry)
 					selected_state.last_dir = vim.fn.fnamemodify(first, ":h")
 					selected_state.last_file = first
 					pcall(vim.cmd, "edit " .. vim.fn.fnameescape(first))
-					for i = 2, #selected do
-						if selected[i] ~= "" and vim.fn.isdirectory(selected[i]) == 0 then
-							vim.cmd("badd " .. vim.fn.fnameescape(vim.fn.fnamemodify(selected[i], ":p")))
+						for i = 2, #selected do
+							if selected[i] ~= "" and vim.fn.isdirectory(selected[i]) == 0 then
+								vim.cmd("badd " .. vim.fn.fnameescape(vim.fn.fnamemodify(selected[i], ":p")))
+							end
 						end
 					end
-				end
-			end)
-		end,
-	})
+				end)
+			end,
+		})
 
 	vim.keymap.set("t", "<Esc>", function()
 		if job_id and job_id > 0 then

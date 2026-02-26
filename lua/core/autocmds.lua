@@ -3,6 +3,7 @@ local autocmd = vim.api.nvim_create_autocmd
 local state_file = vim.fn.stdpath("state") .. "/last-file-by-root.json"
 local last_file_by_root = {}
 local state_dirty = false
+local last_python_restart_at = 0
 
 local function load_state()
 	if vim.fn.filereadable(state_file) ~= 1 then
@@ -140,12 +141,53 @@ local function notify_lsp_watchers(bufnr, change_type)
 
 	local uri = vim.uri_from_fname(name)
 	for _, client in ipairs(vim.lsp.get_clients()) do
-		if client.supports_method("workspace/didChangeWatchedFiles") then
-			client.notify("workspace/didChangeWatchedFiles", {
+		if not (client.supports_method and client:supports_method("workspace/didChangeWatchedFiles")) then
+			goto continue
+		end
+
+		local ok = pcall(function()
+			client:notify("workspace/didChangeWatchedFiles", {
 				changes = { { uri = uri, type = change_type } },
 			})
+		end)
+		if not ok and client.supports_method and client:supports_method("workspace/didChangeWatchedFiles") then
+			pcall(function()
+				client:notify("workspace/didChangeWatchedFiles", {
+					changes = { { uri = uri, type = change_type } },
+				})
+			end)
+		end
+
+		::continue::
+	end
+end
+
+local function refresh_python_workspace()
+	for _, client in ipairs(vim.lsp.get_clients()) do
+		if client.name == "basedpyright" or client.name == "pyright" then
+			pcall(function()
+				client:notify("workspace/didChangeConfiguration", {
+					settings = client.config.settings or {},
+				})
+			end)
 		end
 	end
+end
+
+local function restart_python_lsp()
+	pcall(vim.cmd, "silent! LspRestart basedpyright")
+	pcall(vim.cmd, "silent! LspRestart pyright")
+end
+
+local function maybe_restart_python_lsp()
+	local now = vim.loop.hrtime()
+	local cooldown_ns = 900 * 1000 * 1000 -- 0.9s
+	if now - last_python_restart_at < cooldown_ns then
+		return
+	end
+	last_python_restart_at = now
+	restart_python_lsp()
+	vim.defer_fn(restart_python_lsp, 500)
 end
 
 autocmd("BufNewFile", {
@@ -156,11 +198,22 @@ autocmd("BufNewFile", {
 
 autocmd("BufWritePost", {
 	callback = function(args)
-		if vim.b[args.buf]._lsp_notify_created then
-			vim.b[args.buf]._lsp_notify_created = nil
-			notify_lsp_watchers(args.buf, 1) -- Created
-		else
-			notify_lsp_watchers(args.buf, 2) -- Changed
-		end
-	end,
+			if vim.b[args.buf]._lsp_notify_created then
+				vim.b[args.buf]._lsp_notify_created = nil
+				notify_lsp_watchers(args.buf, 1) -- Created
+				notify_lsp_watchers(args.buf, 2) -- Changed (helps some servers refresh imports)
+			vim.defer_fn(function()
+				if vim.api.nvim_buf_is_valid(args.buf) then
+					notify_lsp_watchers(args.buf, 2)
+				end
+			end, 250)
+			else
+				notify_lsp_watchers(args.buf, 2) -- Changed
+			end
+
+			if vim.bo[args.buf].filetype == "python" then
+				maybe_restart_python_lsp()
+				vim.defer_fn(refresh_python_workspace, 120)
+			end
+		end,
 })

@@ -37,7 +37,7 @@ return {
 			vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
 			vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
 			vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
-			vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, opts)
+			vim.keymap.set("n", "<leader>lf", vim.lsp.buf.format, opts)
 			vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, opts)
 			vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
 			vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
@@ -54,7 +54,7 @@ return {
 					},
 				},
 			},
-			basedpyright = {
+				basedpyright = {
 				root_dir = require("lspconfig.util").root_pattern(
 					"pyproject.toml",
 					"setup.py",
@@ -63,10 +63,20 @@ return {
 					"pyrightconfig.json",
 					".git"
 				),
-				settings = {
-					basedpyright = {
-						analysis = {
-							typeCheckingMode = "basic",
+					settings = {
+						python = {
+							analysis = {
+								typeCheckingMode = "basic",
+								autoSearchPaths = true,
+								useLibraryCodeForTypes = true,
+								diagnosticMode = "workspace",
+								autoImportCompletions = true,
+								indexing = true,
+							},
+						},
+						basedpyright = {
+							analysis = {
+								typeCheckingMode = "basic",
 							autoSearchPaths = true,
 							useLibraryCodeForTypes = true,
 							diagnosticMode = "workspace",
@@ -75,15 +85,16 @@ return {
 						},
 					},
 				},
-				before_init = function(_, config)
-					local venv_path = config.root_dir .. "/.venv/bin/python"
-					if vim.loop.fs_stat(venv_path) then
-						config.settings.python = {
-							pythonPath = venv_path,
-						}
-					end
-				end,
-			},
+					before_init = function(_, config)
+						local venv_path = config.root_dir .. "/.venv/bin/python"
+						if vim.loop.fs_stat(venv_path) then
+							config.settings = config.settings or {}
+							config.settings.python = vim.tbl_deep_extend("force", config.settings.python or {}, {
+								pythonPath = venv_path,
+							})
+						end
+					end,
+				},
 			ruff = {},
 			ts_ls = {},
 			kotlin_language_server = {},
@@ -108,13 +119,13 @@ return {
 		if ok then
 			null_ls.setup({
 				sources = {},
-				on_attach = function(client, bufnr)
-					if client:supports_method("textDocument/formatting") then
-						local opts = { buffer = bufnr, silent = true, noremap = true }
-						vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, opts)
-					end
-				end,
-			})
+					on_attach = function(client, bufnr)
+						if client:supports_method("textDocument/formatting") then
+							local opts = { buffer = bufnr, silent = true, noremap = true }
+							vim.keymap.set("n", "<leader>lf", vim.lsp.buf.format, opts)
+						end
+					end,
+				})
 		end
 
 		-- Removed default format on save to avoid conflicts with conform.nvim

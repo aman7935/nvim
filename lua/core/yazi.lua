@@ -9,6 +9,8 @@ local state = {
 	last_by_root = {},
 }
 
+local yazi_xdg_config_home = vim.fn.stdpath("config") .. "/xdg"
+
 local function get_project_root(path)
 	local normalized = vim.fn.fnamemodify(path, ":p")
 	local root = nil
@@ -82,9 +84,12 @@ function M.open(start_entry)
 		entry = (vim.uv or vim.loop).cwd()
 	end
 
-  local job_id = vim.fn.termopen({ "yazi", entry, "--chooser-file=" .. state.chooser, "--cwd-file=" .. state.cwd_file }, {
-    on_exit = function()
-      vim.schedule(function()
+	local job_id = vim.fn.termopen({ "yazi", entry, "--chooser-file=" .. state.chooser, "--cwd-file=" .. state.cwd_file }, {
+		env = {
+			XDG_CONFIG_HOME = yazi_xdg_config_home,
+		},
+		on_exit = function()
+			vim.schedule(function()
 				local root = state.active_root or get_project_root((vim.uv or vim.loop).cwd())
 				local project_state_inner = state.last_by_root[root] or {}
 				state.last_by_root[root] = project_state_inner
@@ -127,20 +132,20 @@ function M.open(start_entry)
 					end
 				end
 			end)
-    end,
-  })
+		end,
+	})
 
-  vim.keymap.set("t", "<Esc>", function()
-    if job_id and job_id > 0 then
-      vim.api.nvim_chan_send(job_id, "\27")
-    end
-  end, { buffer = state.buf, silent = true, desc = "Send Esc to yazi" })
+	vim.keymap.set("t", "<Esc>", function()
+		if job_id and job_id > 0 then
+			vim.api.nvim_chan_send(job_id, "\27")
+		end
+	end, { buffer = state.buf, silent = true, desc = "Send Esc to yazi" })
 
 	vim.keymap.set("t", "<leader>x", function()
 		M.toggle()
 	end, { buffer = state.buf, silent = true, desc = "Toggle Yazi Explorer" })
 
-  vim.cmd("startinsert")
+	vim.cmd("startinsert")
 end
 
 function M.toggle()

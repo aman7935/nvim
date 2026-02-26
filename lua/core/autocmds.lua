@@ -59,6 +59,21 @@ autocmd("VimEnter", {
 			return
 		end
 
+		if vim.g.started_with_stdin == 1 then
+			return
+		end
+
+		local restored = false
+		local ok_persistence, persistence = pcall(require, "persistence")
+		if ok_persistence and persistence and type(persistence.load) == "function" then
+			pcall(persistence.load)
+			restored = vim.fn.line2byte("$") ~= -1 and vim.api.nvim_buf_get_name(0) ~= ""
+		end
+
+		if restored then
+			return
+		end
+
 		local root = get_project_root(vim.fn.getcwd())
 		local last_file = last_file_by_root[root]
 		if not last_file or vim.fn.filereadable(last_file) ~= 1 then
@@ -89,6 +104,30 @@ autocmd("BufEnter", {
 autocmd("VimLeavePre", {
 	callback = function()
 		save_state()
+	end,
+})
+
+-- Refresh syntax/treesitter after restoring a session so split buffers keep proper colors.
+autocmd("User", {
+	pattern = "PersistenceLoadPost",
+	callback = function()
+		vim.schedule(function()
+			for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+				if vim.api.nvim_buf_is_loaded(bufnr) and vim.bo[bufnr].buftype == "" then
+					local name = vim.api.nvim_buf_get_name(bufnr)
+					if name ~= "" then
+						pcall(vim.api.nvim_buf_call, bufnr, function()
+							vim.cmd("silent! filetype detect")
+							vim.cmd("silent! syntax enable")
+						end)
+
+						if vim.treesitter and vim.treesitter.start then
+							pcall(vim.treesitter.start, bufnr)
+						end
+					end
+				end
+			end
+		end)
 	end,
 })
 

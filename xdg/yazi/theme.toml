@@ -46,14 +46,14 @@ progress_normal = { fg = "#83a598", bg = "#3c3836" }
 progress_error = { fg = "#fb4934", bg = "#3c3836" }
 
 [input]
-border = { fg = "#83a598" }
-title = {}
-value = {}
-selected = { reversed = true }
+border = { fg = "#282828", bg = "#282828" }
+title = { fg = "#a89984", bg = "#282828" }
+value = { fg = "#ebdbb2", bg = "#282828" }
+selected = { fg = "#282828", bg = "#a89984" }
 
 [completion]
-border = { fg = "#83a598" }
-active = { bg = "#3c3836" }
+border = { fg = "#282828", bg = "#282828" }
+active = { fg = "#ebdbb2", bg = "#32302f" }
 
 [tasks]
 border = { fg = "#504945" }

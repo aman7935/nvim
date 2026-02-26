@@ -39,6 +39,31 @@ local function close_window()
 	state.buf = nil
 end
 
+local function open_toggle_window()
+	state.buf = vim.api.nvim_create_buf(false, true)
+
+	local width = math.max(math.floor(vim.o.columns * 0.9), 60)
+	local height = math.max(math.floor(vim.o.lines * 0.85), 20)
+	local col = math.max(math.floor((vim.o.columns - width) / 2), 0)
+	local row = math.max(math.floor((vim.o.lines - height) / 2) - 1, 0)
+
+	state.win = vim.api.nvim_open_win(state.buf, true, {
+		relative = "editor",
+		width = width,
+		height = height,
+		col = col,
+		row = row,
+		style = "minimal",
+		border = "rounded",
+		noautocmd = true,
+	})
+
+	vim.bo[state.buf].bufhidden = "wipe"
+	vim.bo[state.buf].buflisted = false
+	vim.wo[state.win].winblend = 0
+	vim.wo[state.win].winhighlight = "Normal:Normal,NormalFloat:Normal,FloatBorder:FloatBorder"
+end
+
 function M.open(start_entry)
 	if state.win and vim.api.nvim_win_is_valid(state.win) then
 		vim.api.nvim_set_current_win(state.win)
@@ -55,12 +80,7 @@ function M.open(start_entry)
 	state.chooser = vim.fn.tempname()
 	state.cwd_file = vim.fn.tempname()
 
-	vim.cmd("enew")
-	state.win = vim.api.nvim_get_current_win()
-	state.buf = vim.api.nvim_get_current_buf()
-
-	vim.bo[state.buf].bufhidden = "wipe"
-	vim.bo[state.buf].buflisted = false
+	open_toggle_window()
 
 	state.active_root = get_project_root(start_entry or fallback)
 	local project_state = state.last_by_root[state.active_root] or {}

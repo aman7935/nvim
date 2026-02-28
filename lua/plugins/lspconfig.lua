@@ -54,7 +54,7 @@ return {
 					},
 				},
 			},
-				basedpyright = {
+			basedpyright = {
 				root_dir = require("lspconfig.util").root_pattern(
 					"pyproject.toml",
 					"setup.py",
@@ -63,20 +63,20 @@ return {
 					"pyrightconfig.json",
 					".git"
 				),
-					settings = {
-						python = {
-							analysis = {
-								typeCheckingMode = "basic",
-								autoSearchPaths = true,
-								useLibraryCodeForTypes = true,
-								diagnosticMode = "workspace",
-								autoImportCompletions = true,
-								indexing = true,
-							},
+				settings = {
+					python = {
+						analysis = {
+							typeCheckingMode = "basic",
+							autoSearchPaths = true,
+							useLibraryCodeForTypes = true,
+							diagnosticMode = "workspace",
+							autoImportCompletions = true,
+							indexing = true,
 						},
-						basedpyright = {
-							analysis = {
-								typeCheckingMode = "basic",
+					},
+					basedpyright = {
+						analysis = {
+							typeCheckingMode = "basic",
 							autoSearchPaths = true,
 							useLibraryCodeForTypes = true,
 							diagnosticMode = "workspace",
@@ -85,16 +85,16 @@ return {
 						},
 					},
 				},
-					before_init = function(_, config)
-						local venv_path = config.root_dir .. "/.venv/bin/python"
-						if vim.loop.fs_stat(venv_path) then
-							config.settings = config.settings or {}
-							config.settings.python = vim.tbl_deep_extend("force", config.settings.python or {}, {
-								pythonPath = venv_path,
-							})
-						end
-					end,
-				},
+				before_init = function(_, config)
+					local venv_path = config.root_dir .. "/.venv/bin/python"
+					if vim.loop.fs_stat(venv_path) then
+						config.settings = config.settings or {}
+						config.settings.python = vim.tbl_deep_extend("force", config.settings.python or {}, {
+							pythonPath = venv_path,
+						})
+					end
+				end,
+			},
 			ruff = {},
 			ts_ls = {},
 			kotlin_language_server = {},
@@ -119,13 +119,13 @@ return {
 		if ok then
 			null_ls.setup({
 				sources = {},
-					on_attach = function(client, bufnr)
-						if client:supports_method("textDocument/formatting") then
-							local opts = { buffer = bufnr, silent = true, noremap = true }
-							vim.keymap.set("n", "<leader>lf", vim.lsp.buf.format, opts)
-						end
-					end,
-				})
+				on_attach = function(client, bufnr)
+					if client:supports_method("textDocument/formatting") then
+						local opts = { buffer = bufnr, silent = true, noremap = true }
+						vim.keymap.set("n", "<leader>lf", vim.lsp.buf.format, opts)
+					end
+				end,
+			})
 		end
 
 		-- Removed default format on save to avoid conflicts with conform.nvim

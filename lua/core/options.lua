@@ -14,3 +14,13 @@ o.clipboard = "unnamedplus"
 o.sidescrolloff = 8
 o.lazyredraw = false
 o.ttyfast = true
+
+-- JS/TS/JSON use 2-space indentation (industry standard)
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "javascript", "typescript", "typescriptreact", "javascriptreact", "json", "jsonc" },
+	callback = function()
+		vim.opt_local.shiftwidth = 2
+		vim.opt_local.tabstop = 2
+	end,
+})
+

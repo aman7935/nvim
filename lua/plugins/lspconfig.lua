@@ -4,17 +4,16 @@ return {
 	dependencies = {
 		"hrsh7th/cmp-nvim-lsp",
 		"williamboman/mason-lspconfig.nvim",
-		"nvimtools/none-ls.nvim",
 	},
 	config = function()
 		vim.diagnostic.config({
 			virtual_text = { prefix = "●", spacing = 2 },
 			signs = {
 				text = {
-					[vim.diagnostic.severity.ERROR] = "",
-					[vim.diagnostic.severity.WARN] = "",
-					[vim.diagnostic.severity.HINT] = "",
-					[vim.diagnostic.severity.INFO] = "",
+					[vim.diagnostic.severity.ERROR] = "",
+					[vim.diagnostic.severity.WARN] = "",
+					[vim.diagnostic.severity.HINT] = "",
+					[vim.diagnostic.severity.INFO] = "",
 				},
 			},
 			underline = true,
@@ -44,6 +43,30 @@ return {
 			vim.keymap.set("n", "<leader>dl", vim.diagnostic.setloclist, opts)
 		end
 
+		local function pick_ts_server_name()
+			local ok, configs = pcall(require, "lspconfig.configs")
+			if ok then
+				if configs.ts_ls then
+					return "ts_ls"
+				end
+				if configs.tsserver then
+					return "tsserver"
+				end
+			end
+			return "tsserver"
+		end
+
+		local function root_dir_with(patterns)
+			return function(fname)
+				if vim.fs and vim.fs.root then
+					return vim.fs.root(fname, patterns)
+				end
+				return vim.fn.getcwd()
+			end
+		end
+
+		local ts_server_name = pick_ts_server_name()
+
 		local servers = {
 			lua_ls = {
 				settings = {
@@ -55,14 +78,14 @@ return {
 				},
 			},
 			basedpyright = {
-				root_dir = require("lspconfig.util").root_pattern(
+				root_dir = root_dir_with({
 					"pyproject.toml",
 					"setup.py",
 					"setup.cfg",
 					"requirements.txt",
 					"pyrightconfig.json",
-					".git"
-				),
+					".git",
+				}),
 				settings = {
 					python = {
 						analysis = {
@@ -96,11 +119,13 @@ return {
 				end,
 			},
 			ruff = {},
-			ts_ls = {},
-			kotlin_language_server = {},
-			jdtls = {
-				cmd = { "jdtls" },
-				root_dir = require("lspconfig.util").root_pattern(".git", "build.gradle", "pom.xml"),
+			[ts_server_name] = {
+				root_dir = root_dir_with({
+					"package.json",
+					"tsconfig.json",
+					"jsconfig.json",
+					".git",
+				}),
 			},
 		}
 
@@ -110,30 +135,13 @@ return {
 
 			if vim.lsp.config then
 				vim.lsp.config(name, config)
+				if vim.lsp.enable then
+					vim.lsp.enable(name)
+				end
 			else
 				require("lspconfig")[name].setup(config)
 			end
 		end
-
-		local ok, null_ls = pcall(require, "null-ls")
-		if ok then
-			null_ls.setup({
-				sources = {},
-				on_attach = function(client, bufnr)
-					if client:supports_method("textDocument/formatting") then
-						local opts = { buffer = bufnr, silent = true, noremap = true }
-						vim.keymap.set("n", "<leader>lf", vim.lsp.buf.format, opts)
-					end
-				end,
-			})
-		end
-
-		-- Removed default format on save to avoid conflicts with conform.nvim
-		-- vim.api.nvim_create_autocmd("BufWritePre", {
-		--     pattern = "*",
-		--     callback = function()
-		--         vim.lsp.buf.format({ async = false })
-		--     end,
-		-- })
 	end,
 }
+

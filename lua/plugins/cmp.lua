@@ -12,8 +12,14 @@ return {
 	},
 	config = function()
 		local cmp = require("cmp")
-		local luasnip = require("luasnip")
-		require("luasnip.loaders.from_vscode").lazy_load()
+		local types = require("cmp.types")
+		local has_luasnip, luasnip = pcall(require, "luasnip")
+		if has_luasnip then
+			require("luasnip.loaders.from_vscode").lazy_load()
+			require("luasnip.loaders.from_lua").lazy_load({
+				paths = { vim.fn.stdpath("config") .. "/lua/snippets" },
+			})
+		end
 
 		local function escape_pair()
 			local closers = { ")", "]", "}", ">", "'", '"', "`", "," }
@@ -53,13 +59,30 @@ return {
 			end
 		end
 
+		local sources = {
+			has_luasnip and { name = "luasnip", priority = 1000 } or nil,
+			{ name = "nvim_lsp", priority = 900 },
+			{ name = "path", priority = 700 },
+			{ name = "buffer", priority = 500 },
+			{ name = "emoji", priority = 300 },
+		}
+		sources = vim.tbl_filter(function(value)
+			return value ~= nil
+		end, sources)
+
 		cmp.setup({
 			completion = {
 				completeopt = "menu,menuone,noinsert",
+				autocomplete = {
+					cmp.TriggerEvent.InsertEnter,
+					cmp.TriggerEvent.TextChanged,
+				},
 			},
 			snippet = {
 				expand = function(args)
-					luasnip.lsp_expand(args.body)
+					if has_luasnip then
+						luasnip.lsp_expand(args.body)
+					end
 				end,
 			},
 			mapping = cmp.mapping.preset.insert({
@@ -75,17 +98,26 @@ return {
 					end
 				end, { "i", "s" }),
 			}),
-			sources = cmp.config.sources({
-				{ name = "nvim_lsp" },
-				{ name = "luasnip" },
-				{ name = "buffer" },
-				{ name = "path" },
-				{ name = "emoji" },
-			}),
+			sources = cmp.config.sources(sources),
 			experimental = { ghost_text = true },
 			sorting = {
 				priority_weight = 2,
 				comparators = {
+					function(entry1, entry2)
+						local kind1 = entry1:get_kind()
+						local kind2 = entry2:get_kind()
+						local priorities = {
+							[types.lsp.CompletionItemKind.Snippet] = 100,
+							[types.lsp.CompletionItemKind.Function] = 90,
+							[types.lsp.CompletionItemKind.Method] = 85,
+							[types.lsp.CompletionItemKind.Constructor] = 80,
+						}
+						local p1 = priorities[kind1] or 0
+						local p2 = priorities[kind2] or 0
+						if p1 ~= p2 then
+							return p1 > p2
+						end
+					end,
 					cmp.config.compare.offset,
 					cmp.config.compare.exact,
 					cmp.config.compare.score,

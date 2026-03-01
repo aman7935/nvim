@@ -7,14 +7,17 @@ return {
       python = { "ruff_fix", "ruff_format", "ruff_organize_imports" },
       javascript = { "prettier" },
       typescript = { "prettier" },
+      json = { "prettier" },
+      yaml = { "prettier" },
+      html = { "prettier" },
+      css = { "prettier" },
       lua = { "stylua" },
-      java = { "google_java_format" },
-      kotlin = { "ktlint" },
     },
 
     format_on_save = {
       timeout_ms = 1000,
-      lsp_fallback = true,
+      lsp_format = "fallback",
     },
   },
 }
+

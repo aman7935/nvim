@@ -108,9 +108,13 @@ return {
 						local kind2 = entry2:get_kind()
 						local priorities = {
 							[types.lsp.CompletionItemKind.Snippet] = 100,
-							[types.lsp.CompletionItemKind.Function] = 90,
-							[types.lsp.CompletionItemKind.Method] = 85,
-							[types.lsp.CompletionItemKind.Constructor] = 80,
+							[types.lsp.CompletionItemKind.Variable] = 95,
+							[types.lsp.CompletionItemKind.Field] = 92,
+							[types.lsp.CompletionItemKind.Property] = 90,
+							[types.lsp.CompletionItemKind.Constant] = 88,
+							[types.lsp.CompletionItemKind.Function] = 80,
+							[types.lsp.CompletionItemKind.Method] = 78,
+							[types.lsp.CompletionItemKind.Constructor] = 76,
 						}
 						local p1 = priorities[kind1] or 0
 						local p2 = priorities[kind2] or 0
@@ -118,6 +122,8 @@ return {
 							return p1 > p2
 						end
 					end,
+					cmp.config.compare.scopes,
+					cmp.config.compare.locality,
 					cmp.config.compare.offset,
 					cmp.config.compare.exact,
 					cmp.config.compare.score,

@@ -108,10 +108,11 @@ return {
 						local kind2 = entry2:get_kind()
 						local priorities = {
 							[types.lsp.CompletionItemKind.Snippet] = 100,
-							[types.lsp.CompletionItemKind.Variable] = 95,
-							[types.lsp.CompletionItemKind.Field] = 92,
-							[types.lsp.CompletionItemKind.Property] = 90,
-							[types.lsp.CompletionItemKind.Constant] = 88,
+							[types.lsp.CompletionItemKind.Keyword] = 95,
+							[types.lsp.CompletionItemKind.Variable] = 90,
+							[types.lsp.CompletionItemKind.Field] = 88,
+							[types.lsp.CompletionItemKind.Property] = 86,
+							[types.lsp.CompletionItemKind.Constant] = 84,
 							[types.lsp.CompletionItemKind.Function] = 80,
 							[types.lsp.CompletionItemKind.Method] = 78,
 							[types.lsp.CompletionItemKind.Constructor] = 76,

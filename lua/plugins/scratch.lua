@@ -17,12 +17,15 @@ return {
 				scratchpad.ui:new_scratchpad()
 			end,
 			desc = "show scratch pad",
-
-			vim.keymap.set({ "n", "v" }, "<leader>ps", function()
+		},
+		{
+			"<leader>ps",
+			mode = { "n", "v" },
+			function()
 				local scratchpad = require("scratchpad")
 				scratchpad.ui:sync()
-			end, { desc = "Push selection / current line to scratchpad" }),
+			end,
+			desc = "Push selection / current line to scratchpad",
 		},
 	},
 }
-

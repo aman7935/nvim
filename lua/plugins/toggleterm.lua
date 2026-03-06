@@ -1,6 +1,13 @@
 return {
 	"akinsho/toggleterm.nvim",
 	version = "*",
+	cmd = "ToggleTerm",
+	keys = {
+		{ "<C-/>", mode = { "n", "t" } },
+		{ "<C-_>", mode = "t" },
+		{ "<leader>tt", mode = "n" },
+		{ "<leader>ll", mode = { "n", "t" } },
+	},
 	config = function()
 		local Terminal = require("toggleterm.terminal").Terminal
 		local toggleterm = require("toggleterm")

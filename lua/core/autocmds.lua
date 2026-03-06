@@ -3,7 +3,6 @@ local autocmd = vim.api.nvim_create_autocmd
 local state_file = vim.fn.stdpath("state") .. "/last-file-by-root.json"
 local last_file_by_root = {}
 local state_dirty = false
-local last_python_restart_at = 0
 
 local function load_state()
 	if vim.fn.filereadable(state_file) ~= 1 then
@@ -174,22 +173,6 @@ local function refresh_python_workspace()
 	end
 end
 
-local function restart_python_lsp()
-	pcall(vim.cmd, "silent! LspRestart basedpyright")
-	pcall(vim.cmd, "silent! LspRestart pyright")
-end
-
-local function maybe_restart_python_lsp()
-	local now = vim.loop.hrtime()
-	local cooldown_ns = 900 * 1000 * 1000 -- 0.9s
-	if now - last_python_restart_at < cooldown_ns then
-		return
-	end
-	last_python_restart_at = now
-	restart_python_lsp()
-	vim.defer_fn(restart_python_lsp, 500)
-end
-
 autocmd("BufNewFile", {
 	callback = function(args)
 		vim.b[args.buf]._lsp_notify_created = true
@@ -212,7 +195,6 @@ autocmd("BufWritePost", {
 			end
 
 			if vim.bo[args.buf].filetype == "python" then
-				maybe_restart_python_lsp()
 				vim.defer_fn(refresh_python_workspace, 120)
 			end
 		end,

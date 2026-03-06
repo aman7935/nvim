@@ -40,16 +40,18 @@ local function close_window()
 end
 
 local function restart_python_lsp_after_yazi()
-	-- Files created in Yazi may not be indexed by Python LSP immediately.
-	-- Restart Python servers on Yazi exit to keep imports/completions fresh.
+	-- Files created in Yazi may not be indexed immediately; refresh server settings once.
 	vim.defer_fn(function()
-		pcall(vim.cmd, "silent! LspRestart basedpyright")
-		pcall(vim.cmd, "silent! LspRestart pyright")
-	end, 120)
-	vim.defer_fn(function()
-		pcall(vim.cmd, "silent! LspRestart basedpyright")
-		pcall(vim.cmd, "silent! LspRestart pyright")
-	end, 700)
+		for _, client in ipairs(vim.lsp.get_clients()) do
+			if client.name == "basedpyright" or client.name == "pyright" then
+				pcall(function()
+					client:notify("workspace/didChangeConfiguration", {
+						settings = client.config.settings or {},
+					})
+				end)
+			end
+		end
+	end, 150)
 end
 
 local function open_toggle_window()

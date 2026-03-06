@@ -1,5 +1,7 @@
 local function apply_black_background()
 	local black = "#000000"
+	local indent_fg = "#4a4a4a"
+	local scope_fg = "#8a8a8a"
 
 	-- Core
 	vim.api.nvim_set_hl(0, "Normal", { bg = black })
@@ -26,6 +28,11 @@ local function apply_black_background()
 	vim.api.nvim_set_hl(0, "TelescopePromptBorder", { bg = black })
 	vim.api.nvim_set_hl(0, "TelescopePreviewBorder", { bg = black })
 	vim.api.nvim_set_hl(0, "TelescopeResultsBorder", { bg = black })
+
+	-- Indent guides on black background
+	vim.api.nvim_set_hl(0, "Whitespace", { fg = indent_fg, bg = black })
+	vim.api.nvim_set_hl(0, "IblIndent", { fg = indent_fg, bg = black })
+	vim.api.nvim_set_hl(0, "IblScope", { fg = scope_fg, bg = black, bold = true })
 end
 
 vim.api.nvim_create_autocmd("ColorScheme", {

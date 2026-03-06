@@ -14,6 +14,8 @@ o.clipboard = "unnamedplus"
 o.sidescrolloff = 8
 o.lazyredraw = false
 o.ttyfast = true
+o.list = true
+o.listchars = { tab = "  ", trail = "·", nbsp = "␣" }
 
 -- JS/TS/JSON use 2-space indentation (industry standard)
 vim.api.nvim_create_autocmd("FileType", {

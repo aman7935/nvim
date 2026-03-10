@@ -14,6 +14,8 @@ return {
 			"lua-language-server",
 			"basedpyright",
 			"typescript-language-server",
+			"rust-analyzer",
+			"codelldb",
 		},
 		auto_update = false,
 		run_on_start = false,

@@ -18,6 +18,6 @@ return {
 			"codelldb",
 		},
 		auto_update = false,
-		run_on_start = false,
+		run_on_start = true,
 	},
 }

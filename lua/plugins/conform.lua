@@ -12,6 +12,7 @@ return {
       html = { "prettier" },
       css = { "prettier" },
       lua = { "stylua" },
+      rust = { "rustfmt" },
     },
 
     format_on_save = {
@@ -20,4 +21,3 @@ return {
     },
   },
 }
-

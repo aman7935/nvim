@@ -8,6 +8,7 @@ o.tabstop = 4
 o.smartindent = true
 o.wrap = false
 o.termguicolors = true
+o.scrolloff = 5
 o.signcolumn = "yes"
 o.cursorline = true
 o.clipboard = "unnamedplus"

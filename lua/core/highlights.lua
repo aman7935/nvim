@@ -33,6 +33,8 @@ local function apply_black_background()
 	vim.api.nvim_set_hl(0, "Whitespace", { fg = indent_fg, bg = black })
 	vim.api.nvim_set_hl(0, "IblIndent", { fg = indent_fg, bg = black })
 	vim.api.nvim_set_hl(0, "IblScope", { fg = scope_fg, bg = black, bold = true })
+	vim.api.nvim_set_hl(0, "MiniIndentscopeSymbol", { fg = scope_fg, bg = black })
+	vim.api.nvim_set_hl(0, "MiniIndentscopePrefix", { fg = indent_fg, bg = black })
 end
 
 vim.api.nvim_create_autocmd("ColorScheme", {

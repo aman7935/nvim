@@ -93,6 +93,8 @@ return {
 				["<Esc>"] = cmp.mapping(function(fallback)
 					if cmp.visible() then
 						cmp.abort()
+						-- Exit insert mode with a single Esc even when the menu is open
+						vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
 					else
 						fallback()
 					end

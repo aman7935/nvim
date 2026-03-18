@@ -1,6 +1,6 @@
 return {
 	"echasnovski/mini.indentscope",
-	enabled = false,
+	enabled = true,
 	version = false, -- wait for next release to use 'main' branch
 	event = "VeryLazy",
 	opts = {

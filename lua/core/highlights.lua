@@ -9,6 +9,8 @@ local function set_custom_highlights()
 	vim.api.nvim_set_hl(0, "IblScope", { fg = scope_fg, bold = true })
 	vim.api.nvim_set_hl(0, "MiniIndentscopeSymbol", { fg = scope_fg })
 	vim.api.nvim_set_hl(0, "MiniIndentscopePrefix", { fg = indent_fg })
+	-- Outline matching brackets instead of filling the background
+	vim.api.nvim_set_hl(0, "MatchParen", { fg = cursorline_nr, bg = "NONE", underline = true, bold = true })
 	-- Emphasize current line and column with a subtle background
 	vim.api.nvim_set_hl(0, "CursorLine", { bg = "#2d2d2d" })
 	vim.api.nvim_set_hl(0, "CursorColumn", { bg = "#2d2d2d" })

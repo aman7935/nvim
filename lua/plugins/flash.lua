@@ -5,7 +5,7 @@ return {
 		opts = {
 			modes = {
 				char = {
-					enabled = true,
+					enabled = false,
 					-- show jump labels
 					jump_labels = true,
 					-- hide after jump

@@ -28,3 +28,8 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.opt_local.tabstop = 2
 	end,
 })
+
+-- Netrw Configuration
+
+vim.g.netrw_liststyle = 3 -- tree view (standard for many)
+vim.g.netrw_browse_split = 0 -- open in same window

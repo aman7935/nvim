@@ -6,7 +6,7 @@ return {
 		"williamboman/mason-lspconfig.nvim",
 	},
 	config = function()
-		vim.diagnostic.config({
+		pcall(vim.diagnostic.config, {
 			virtual_text = { prefix = "●", spacing = 2 },
 			signs = {
 				text = {
@@ -41,19 +41,43 @@ return {
 			vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
 			vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
 			vim.keymap.set("n", "<leader>dl", vim.diagnostic.setloclist, opts)
-		end
 
-		local function pick_ts_server_name()
-			local ok, configs = pcall(require, "lspconfig.configs")
-			if ok then
-				if configs.ts_ls then
-					return "ts_ls"
-				end
-				if configs.tsserver then
-					return "tsserver"
-				end
+			if client.name == "vtsls" then
+				vim.keymap.set("n", "<leader>co", function()
+					client.request("workspace/executeCommand", {
+						command = "typescript.organizeImports",
+						arguments = { vim.api.nvim_buf_get_name(0) },
+					})
+				end, { buffer = bufnr, desc = "Organize Imports" })
+
+				vim.keymap.set("n", "<leader>cm", function()
+					client.request("workspace/executeCommand", {
+						command = "typescript.addMissingImports",
+						arguments = { vim.api.nvim_buf_get_name(0) },
+					})
+				end, { buffer = bufnr, desc = "Add Missing Imports" })
+
+				vim.keymap.set("n", "<leader>cu", function()
+					client.request("workspace/executeCommand", {
+						command = "typescript.removeUnused",
+						arguments = { vim.api.nvim_buf_get_name(0) },
+					})
+				end, { buffer = bufnr, desc = "Remove Unused Imports" })
+
+				vim.keymap.set("n", "<leader>cf", function()
+					client.request("workspace/executeCommand", {
+						command = "typescript.fixAll",
+						arguments = { vim.api.nvim_buf_get_name(0) },
+					})
+				end, { buffer = bufnr, desc = "Fix All Problems" })
+
+				vim.keymap.set("n", "gs", function()
+					client.request("workspace/executeCommand", {
+						command = "typescript.goToSourceDefinition",
+						arguments = { vim.api.nvim_buf_get_name(0), vim.lsp.util.make_position_params().position },
+					})
+				end, { buffer = bufnr, desc = "Go to Source Definition" })
 			end
-			return "tsserver"
 		end
 
 		local function root_dir_with(patterns)
@@ -64,8 +88,6 @@ return {
 				return vim.fn.getcwd()
 			end
 		end
-
-		local ts_server_name = pick_ts_server_name()
 
 		local servers = {
 			lua_ls = {
@@ -111,7 +133,7 @@ return {
 				},
 				before_init = function(_, config)
 					local venv_path = config.root_dir .. "/.venv/bin/python"
-					if vim.loop.fs_stat(venv_path) then
+					if vim.uv.fs_stat(venv_path) then
 						config.settings = config.settings or {}
 						config.settings.python = vim.tbl_deep_extend("force", config.settings.python or {}, {
 							pythonPath = venv_path,
@@ -120,27 +142,88 @@ return {
 				end,
 			},
 			ruff = {},
-			[ts_server_name] = {
+			vtsls = {
 				root_dir = root_dir_with({
 					"package.json",
 					"tsconfig.json",
 					"jsconfig.json",
 					".git",
 				}),
+				settings = {
+					complete_function_calls = true,
+					vtsls = {
+						autoUseWorkspaceTsdk = true,
+						experimental = {
+							completion = {
+								enableServerSidePolyfills = true,
+							},
+						},
+					},
+					javascript = {
+						updateImportsOnFileMove = { enabled = "always" },
+						suggest = {
+							autoImports = true,
+						},
+						inlayHints = {
+							parameterNames = { enabled = "literals" },
+							parameterTypes = { enabled = true },
+							variableTypes = { enabled = true },
+							propertyDeclarationTypes = { enabled = true },
+							functionLikeReturnTypes = { enabled = true },
+							enumMemberValues = { enabled = true },
+						},
+					},
+					typescript = {
+						updateImportsOnFileMove = { enabled = "always" },
+						suggest = {
+							autoImports = true,
+						},
+						inlayHints = {
+							parameterNames = { enabled = "literals" },
+							parameterTypes = { enabled = true },
+							variableTypes = { enabled = true },
+							propertyDeclarationTypes = { enabled = true },
+							functionLikeReturnTypes = { enabled = true },
+							enumMemberValues = { enabled = true },
+						},
+					},
+				},
 			},
 		}
 
 		for name, config in pairs(servers) do
+			local ok, config_def = pcall(require, "lspconfig.configs." .. name)
+			if ok and config_def and config_def.default_config then
+				config = vim.tbl_deep_extend("force", config_def.default_config, config)
+			end
+
 			config.capabilities = capabilities
 			config.on_attach = on_attach
 
-			if vim.lsp.config then
-				vim.lsp.config(name, config)
-				if vim.lsp.enable then
-					vim.lsp.enable(name)
+			-- The new vim.lsp.config API expects root_dir to be a function with
+			-- signature (bufnr, on_dir) instead of the old (fname) -> string.
+			-- Wrap old-style functions so they work with the new async API.
+			if type(config.root_dir) == "function" then
+				local orig = config.root_dir
+				config.root_dir = function(bufnr, on_dir)
+					local fname = vim.api.nvim_buf_get_name(bufnr)
+					if fname and fname ~= "" then
+						on_dir(orig(fname, bufnr))
+					end
 				end
-			else
-				require("lspconfig")[name].setup(config)
+			end
+
+			local before_init = config.before_init
+			if before_init then
+				config.on_init = function(client, _)
+					before_init(client.config, client.config.root_dir)
+				end
+				config.before_init = nil
+			end
+
+			vim.lsp.config(name, config)
+			if config.autostart ~= false then
+				vim.lsp.enable(name)
 			end
 		end
 	end,

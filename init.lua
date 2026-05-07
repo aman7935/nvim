@@ -1,6 +1,4 @@
--- Disable built-in plugins not used in this config to reduce startup work.
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
+-- Enable netrw for the traditional file explorer experience.
 vim.g.loaded_gzip = 1
 vim.g.loaded_tar = 1
 vim.g.loaded_tarPlugin = 1

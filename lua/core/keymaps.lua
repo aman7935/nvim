@@ -21,7 +21,12 @@ k("n", "<Esc>", "<cmd>nohlsearch<CR><Esc>", { silent = true, desc = "Clear searc
 -- Python Tools
 k("n", "<leader>cv", "<cmd>VenvSelect<cr>", { desc = "Select VirtualEnv" })
 
--- Explorer (yazi in current window)
-k("n", "<leader>x", function()
-	require("core.yazi").toggle()
-end, { desc = "Toggle Yazi Explorer" })
+-- Traditional File Explorer (netrw)
+k("n", "<leader>e", function()
+	if vim.bo.filetype == "netrw" then
+		vim.cmd("Rexplore")
+	else
+		vim.cmd("Ex")
+	end
+end, { desc = "Toggle netrw" })
+

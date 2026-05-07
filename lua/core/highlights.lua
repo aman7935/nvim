@@ -15,6 +15,27 @@ local function set_custom_highlights()
 	vim.api.nvim_set_hl(0, "CursorLine", { bg = "#2d2d2d" })
 	vim.api.nvim_set_hl(0, "CursorColumn", { bg = "#2d2d2d" })
 	vim.api.nvim_set_hl(0, "CursorLineNr", { fg = cursorline_nr, bold = true })
+
+	-- Telescope transparency
+	local telescope_groups = {
+		"TelescopeNormal",
+		"TelescopeBorder",
+		"TelescopePromptNormal",
+		"TelescopePromptBorder",
+		"TelescopeResultsNormal",
+		"TelescopeResultsBorder",
+		"TelescopePreviewNormal",
+		"TelescopePreviewBorder",
+	}
+	for _, group in ipairs(telescope_groups) do
+		vim.api.nvim_set_hl(0, group, { bg = "none" })
+	end
+
+	-- Green StatusLine
+	local green = "#899c5a" -- Jellybeans green
+	local dark = "#151515"  -- Jellybeans dark
+	vim.api.nvim_set_hl(0, "StatusLine", { fg = dark, bg = green, bold = true })
+	vim.api.nvim_set_hl(0, "StatusLineNC", { fg = green, bg = dark })
 end
 
 vim.api.nvim_create_autocmd("ColorScheme", {

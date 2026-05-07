@@ -12,6 +12,7 @@ return {
       local telescope = require("telescope")
       telescope.setup({
         defaults = {
+          winblend = 0,
           mappings = {
             i = {
               ["<C-v>"] = function()

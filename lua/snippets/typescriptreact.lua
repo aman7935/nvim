@@ -9,4 +9,18 @@ return {
 		i(1),
 		t(")"),
 	}),
+	s("ec", {
+		t("export const "),
+		i(1, "name"),
+		t(" = "),
+		i(2, "value"),
+		t(";"),
+	}),
+	s("el", {
+		t("export let "),
+		i(1, "name"),
+		t(" = "),
+		i(2, "value"),
+		t(";"),
+	}),
 }

@@ -131,15 +131,23 @@ return {
 						},
 					},
 				},
-				before_init = function(_, config)
-					local venv_path = config.root_dir .. "/.venv/bin/python"
-					if vim.uv.fs_stat(venv_path) then
-						config.settings = config.settings or {}
-						config.settings.python = vim.tbl_deep_extend("force", config.settings.python or {}, {
-							pythonPath = venv_path,
-						})
-					end
-				end,
+before_init = function(params, config)
+	local root = config.root_dir or vim.loop.cwd()
+
+	local venv_path = root .. "/.venv/bin/python"
+
+	if vim.uv.fs_stat(venv_path) then
+		config.settings = config.settings or {}
+
+		config.settings.python = vim.tbl_deep_extend(
+			"force",
+			config.settings.python or {},
+			{
+				pythonPath = venv_path,
+			}
+		)
+	end
+end,
 			},
 			ruff = {},
 			vtsls = {
@@ -213,13 +221,6 @@ return {
 				end
 			end
 
-			local before_init = config.before_init
-			if before_init then
-				config.on_init = function(client, _)
-					before_init(client.config, client.config.root_dir)
-				end
-				config.before_init = nil
-			end
 
 			vim.lsp.config(name, config)
 			if config.autostart ~= false then

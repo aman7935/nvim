@@ -200,9 +200,11 @@ end,
 		}
 
 		for name, config in pairs(servers) do
-			local ok, config_def = pcall(require, "lspconfig.configs." .. name)
-			if ok and config_def and config_def.default_config then
-				config = vim.tbl_deep_extend("force", config_def.default_config, config)
+			if name ~= "kotlin_language_server" then
+				local ok, config_def = pcall(require, "lspconfig.configs." .. name)
+				if ok and config_def and config_def.default_config then
+					config = vim.tbl_deep_extend("force", config_def.default_config, config)
+				end
 			end
 
 			config.capabilities = capabilities

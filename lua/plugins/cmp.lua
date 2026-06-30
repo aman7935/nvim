@@ -105,6 +105,21 @@ return {
 			sorting = {
 				priority_weight = 2,
 				comparators = {
+					cmp.config.compare.exact,
+					cmp.config.compare.offset,
+					function(entry1, entry2)
+						local label1 = entry1.completion_item.label or ""
+						local label2 = entry2.completion_item.label or ""
+						if label1 == "print" and label2 == "pprint" then
+							return true
+						elseif label1 == "pprint" and label2 == "print" then
+							return false
+						end
+					end,
+					cmp.config.compare.score,
+					cmp.config.compare.length,
+					cmp.config.compare.recently_used,
+					cmp.config.compare.locality,
 					function(entry1, entry2)
 						local kind1 = entry1:get_kind()
 						local kind2 = entry2:get_kind()
@@ -126,14 +141,8 @@ return {
 						end
 					end,
 					cmp.config.compare.scopes,
-					cmp.config.compare.locality,
-					cmp.config.compare.offset,
-					cmp.config.compare.exact,
-					cmp.config.compare.score,
-					cmp.config.compare.recently_used,
 					cmp.config.compare.kind,
 					cmp.config.compare.sort_text,
-					cmp.config.compare.length,
 					cmp.config.compare.order,
 				},
 			},

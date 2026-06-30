@@ -9,12 +9,14 @@ return {
 			"debugpy",
 			"prettier",
 			"stylua",
+			"ktlint",
 
 			-- LSP servers (Mason names)
 			"lua-language-server",
 			"basedpyright",
 			"typescript-language-server",
 			"rust-analyzer",
+			"kotlin-language-server",
 			"codelldb",
 		},
 		auto_update = false,

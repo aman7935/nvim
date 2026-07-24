@@ -12,18 +12,13 @@ return {
       html = { "prettier" },
       css = { "prettier" },
       lua = { "stylua" },
-      kotlin = { "ktlint" },
+
       rust = { "rustfmt" },
     },
 
     format_on_save = {
       timeout_ms = 1000,
-      lsp_format = "fallback",
-    },
-    formatters = {
-      ktlint = {
-        require_cwd = true,
-      },
+      lsp_format = "never",
     },
   },
 }

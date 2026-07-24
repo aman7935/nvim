@@ -1,5 +1,9 @@
 -- Keep a few foreground tweaks for indent guides without overriding the background.
 local function set_custom_highlights()
+	-- Transparent background
+	vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
+	vim.api.nvim_set_hl(0, "NormalNC", { bg = "NONE" })
+
 	local indent_fg = "#4a4a4a"
 	local cursorline_nr = "#ffd75f"
 	local scope_fg = cursorline_nr

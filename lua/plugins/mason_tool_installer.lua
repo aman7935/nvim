@@ -10,6 +10,8 @@ return {
 			"prettier",
 			"stylua",
 			"ktlint",
+			"clang-format",
+			"bear",
 
 			-- LSP servers (Mason names)
 			"lua-language-server",
@@ -18,6 +20,7 @@ return {
 			"rust-analyzer",
 			"kotlin-language-server",
 			"codelldb",
+			"clangd",
 		},
 		auto_update = false,
 		run_on_start = true,

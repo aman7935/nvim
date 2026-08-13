@@ -11,6 +11,8 @@ return {
 				"lua",
 				"vim",
 				"bash",
+				"c",
+				"cpp",
 				"javascript",
 				"typescript",
 				"tsx",

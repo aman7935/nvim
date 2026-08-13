@@ -12,13 +12,21 @@ return {
       html = { "prettier" },
       css = { "prettier" },
       lua = { "stylua" },
+      c = { "clang-format" },
+      cpp = { "clang-format" },
 
       rust = { "rustfmt" },
     },
 
-    format_on_save = {
-      timeout_ms = 1000,
-      lsp_format = "never",
-    },
+    format_on_save = function(bufnr)
+      local ft = vim.bo[bufnr].filetype
+      if ft == "c" or ft == "cpp" then
+        return
+      end
+      return {
+        timeout_ms = 1000,
+        lsp_format = "never",
+      }
+    end,
   },
 }

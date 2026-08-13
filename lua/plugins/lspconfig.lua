@@ -150,6 +150,11 @@ before_init = function(params, config)
 end,
 			},
 			ruff = {},
+			clangd = {
+				cmd = {
+					vim.fn.stdpath("data") .. "/mason/bin/clangd",
+				},
+			},
 			vtsls = {
 				root_dir = root_dir_with({
 					"package.json",

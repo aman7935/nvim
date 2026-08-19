@@ -18,7 +18,8 @@ local function set_custom_highlights()
 	-- Emphasize current line and column with a subtle background
 	vim.api.nvim_set_hl(0, "CursorLine", { bg = "#2d2d2d" })
 	vim.api.nvim_set_hl(0, "CursorColumn", { bg = "#2d2d2d" })
-	vim.api.nvim_set_hl(0, "CursorLineNr", { fg = cursorline_nr, bold = true })
+	vim.api.nvim_set_hl(0, "CursorLineNr", { fg = "#ffffff", bold = true })
+	vim.api.nvim_set_hl(0, "EndOfBuffer", { fg = "#ffffff" })
 
 	-- Telescope transparency
 	local telescope_groups = {

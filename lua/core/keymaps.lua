@@ -17,9 +17,31 @@ end, { desc = "Format file" })
 
 k("n", "<Esc>", "<cmd>nohlsearch<CR><Esc>", { silent = true, desc = "Clear search highlights" })
 
--- DAP (Debugging)
 -- Python Tools
 k("n", "<leader>cv", "<cmd>VenvSelect<cr>", { desc = "Select VirtualEnv" })
+
+-- Session (mksession)
+local function session_path()
+	local dir = vim.fn.getcwd():gsub("/", "__")
+	return vim.fn.stdpath("data") .. "/session/" .. dir .. ".vim"
+end
+
+k("n", "<leader>ss", function()
+	local p = session_path()
+	vim.fn.mkdir(vim.fn.fnamemodify(p, ":h"), "p")
+	vim.cmd("mksession! " .. p)
+	print("Session saved")
+end, { desc = "Save Session" })
+
+k("n", "<leader>sr", function()
+	local p = session_path()
+	if vim.fn.filereadable(p) == 1 then
+		vim.cmd("source " .. p)
+		print("Session restored")
+	else
+		print("No session found for this project")
+	end
+end, { desc = "Restore Session" })
 
 -- Traditional File Explorer (netrw)
 k("n", "<leader>e", function()

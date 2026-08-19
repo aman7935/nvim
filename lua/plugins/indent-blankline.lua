@@ -19,8 +19,8 @@ return {
 	},
 	config = function(_, opts)
 		-- Make sure highlights exist and are visible on all themes
-		vim.api.nvim_set_hl(0, "IblScope", { link = "CursorLineNr" })
-		vim.api.nvim_set_hl(0, "IblIndent", { link = "Comment" })
+		vim.api.nvim_set_hl(0, "IblScope", { fg = "#ffffff", bold = true })
+		vim.api.nvim_set_hl(0, "IblIndent", { fg = "#4a4a4a" })
 
 		-- Use Treesitter extmarks to highlight the current scope (block under cursor)
 		local hooks = require("ibl.hooks")

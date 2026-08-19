@@ -19,6 +19,7 @@ o.lazyredraw = false
 o.ttyfast = true
 o.list = true
 o.listchars = { tab = "  ", trail = "·", nbsp = "␣" }
+o.statusline = " %f %m%= %l,%c  %P"
 
 -- JS/TS/JSON use 2-space indentation (industry standard)
 vim.api.nvim_create_autocmd("FileType", {

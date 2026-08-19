@@ -6,7 +6,7 @@ local function set_custom_highlights()
 
 	local indent_fg = "#4a4a4a"
 	local cursorline_nr = "#ffd75f"
-	local scope_fg = cursorline_nr
+	local scope_fg = "#ffffff"
 
 	vim.api.nvim_set_hl(0, "Whitespace", { fg = indent_fg })
 	vim.api.nvim_set_hl(0, "IblIndent", { fg = indent_fg })
@@ -35,11 +35,7 @@ local function set_custom_highlights()
 		vim.api.nvim_set_hl(0, group, { bg = "none" })
 	end
 
-	-- Green StatusLine
-	local green = "#899c5a" -- Jellybeans green
-	local dark = "#151515"  -- Jellybeans dark
-	vim.api.nvim_set_hl(0, "StatusLine", { fg = dark, bg = green, bold = true })
-	vim.api.nvim_set_hl(0, "StatusLineNC", { fg = green, bg = dark })
+
 end
 
 vim.api.nvim_create_autocmd("ColorScheme", {

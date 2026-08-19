@@ -202,6 +202,23 @@ local function cpp_run()
 	show_output("__Cpp_Output__", run_out .. "\n\n(exit code: " .. exit_code .. ")")
 end
 
+-- Net ( open / [ open minus close for a line, ignoring string literals.
+local function bracket_delta(line)
+	local stripped = line:gsub('"[^"]*"', "")
+	local _, open_count = stripped:gsub("[%(%[]", "")
+	local _, close_count = stripped:gsub("[%)%]]", "")
+	return open_count - close_count
+end
+
+-- True when a `(`/`[` opened on a line before `row` is still unclosed.
+local function continuation_before(row)
+	local balance = 0
+	for _, line in ipairs(vim.api.nvim_buf_get_lines(0, 0, row - 1, false)) do
+		balance = balance + bracket_delta(line)
+	end
+	return balance > 0
+end
+
 local function line_needs_semicolon(code)
 	if code == "" then
 		return false
@@ -219,6 +236,9 @@ local function line_needs_semicolon(code)
 		return false
 	end
 	if code:match('^%s*"') then
+		return false
+	end
+	if bracket_delta(code) > 0 then
 		return false
 	end
 	if code:match("^%s*(if|for|while|switch|catch|else%s*if)%s*%(.+%)%s*$") then
@@ -264,12 +284,16 @@ end
 local function fix_missing_semicolons()
 	local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 	local changed = false
+	local balance = 0
 	for i, line in ipairs(lines) do
-		local fixed = semicolon_fixed(line)
-		if fixed and fixed ~= line then
-			lines[i] = fixed
-			changed = true
+		if balance <= 0 then
+			local fixed = semicolon_fixed(line)
+			if fixed and fixed ~= line then
+				lines[i] = fixed
+				changed = true
+			end
 		end
+		balance = balance + bracket_delta(line)
 	end
 	if changed then
 		vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
@@ -282,10 +306,12 @@ end
 
 -- Normal-mode `o` / `O`: append a missing `;` to the current statement, then open the line.
 local function open_line(key)
-	local fixed = semicolon_fixed(vim.api.nvim_get_current_line())
-	if fixed then
-		local row = vim.api.nvim_win_get_cursor(0)[1]
-		vim.api.nvim_buf_set_text(0, row - 1, 0, row - 1, -1, { fixed })
+	local row = vim.api.nvim_win_get_cursor(0)[1]
+	if not continuation_before(row) then
+		local fixed = semicolon_fixed(vim.api.nvim_get_current_line())
+		if fixed then
+			vim.api.nvim_buf_set_text(0, row - 1, 0, row - 1, -1, { fixed })
+		end
 	end
 	local prefix = vim.v.count > 0 and tostring(vim.v.count) or ""
 	vim.api.nvim_feedkeys(prefix .. key, "n", false)
@@ -297,6 +323,11 @@ local function semicolon_on_enter()
 	local line = vim.api.nvim_get_current_line()
 
 	if line:sub(1, col + 1) ~= line:gsub("%s+$", "") then
+		press_enter()
+		return
+	end
+
+	if continuation_before(row) then
 		press_enter()
 		return
 	end
